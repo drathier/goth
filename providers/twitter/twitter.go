@@ -47,6 +47,21 @@ func NewAuthenticate(clientKey, secret, callbackURL string) *Provider {
 	return p
 }
 
+// NewAuthenticateBoth is the almost same as NewAuthenticate.
+// NewAuthenticateBoth the provider name "twitter_auth" instead of "twitter".
+// This means we can use both Authenticate and Authorize side-by-side.
+func NewAuthenticateBoth(clientKey, secret, callbackURL string) *Provider {
+	p := &Provider{
+		ClientKey:   clientKey,
+		Secret:      secret,
+		CallbackURL: callbackURL,
+		isAuth:     true,
+	}
+	p.consumer = newConsumer(p, authenticateURL)
+	return p
+}
+
+
 // Provider is the implementation of `goth.Provider` for accessing Twitter.
 type Provider struct {
 	ClientKey   string
@@ -54,10 +69,14 @@ type Provider struct {
 	CallbackURL string
 	debug       bool
 	consumer    *oauth.Consumer
+	isAuth      bool
 }
 
 // Name is the name used to retrieve this provider later.
 func (p *Provider) Name() string {
+	if p.isAuth {
+		return "twitter_auth"
+	}
 	return "twitter"
 }
 
